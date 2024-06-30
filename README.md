@@ -1,4 +1,3 @@
-```markdown
 # Azure Key Vault Secrets Utility
 
 This utility provides a command-line interface to interact with Azure Key Vault secrets. It allows you to list, show, get, and compare secrets stored in different Azure Key Vaults.

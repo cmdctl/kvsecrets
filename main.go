@@ -110,13 +110,13 @@ func main() {
 	}
 
 	switch args[1] {
-  case "get":
-    vaultName := args[2]
-    keyName := args[3]
-    value := getValuesFromKeys(vaultName, []string{keyName})[keyName]
-    fmt.Print(value)
+	case "get":
+		vaultName := args[2]
+		keyName := args[3]
+		value := getValuesFromKeys(vaultName, []string{keyName})[keyName]
+		fmt.Print(value)
 	case "list":
-    vaultName := args[2]
+		vaultName := args[2]
 		keys := ListKvKeys(vaultName)
 		for _, key := range keys {
 			fmt.Println(key)
@@ -140,5 +140,6 @@ func main() {
 
 	default:
 		fmt.Println("Invalid command")
+    displayUsage()
 	}
 }

@@ -78,6 +78,8 @@ func ListKvKeys(name string) []string {
 func displayUsage() {
 	fmt.Println("Usage: secrets show <vault-name>")
 	fmt.Println("Usage: secrets diff <vault-name> <vault-name>")
+	fmt.Println("Usage: secrets list <vault-name>")
+	fmt.Println("Usage: secrets get <vault-name> <key-name>")
 }
 
 func getKvKeyValPairsAsString(name string) string {
@@ -100,7 +102,6 @@ func getKvKeyValPairsAsString(name string) string {
 	return kvPairs
 }
 
-
 func main() {
 	args := os.Args
 	if len(args) < 3 {
@@ -109,6 +110,17 @@ func main() {
 	}
 
 	switch args[1] {
+  case "get":
+    vaultName := args[2]
+    keyName := args[3]
+    value := getValuesFromKeys(vaultName, []string{keyName})[keyName]
+    fmt.Print(value)
+	case "list":
+    vaultName := args[2]
+		keys := ListKvKeys(vaultName)
+		for _, key := range keys {
+			fmt.Println(key)
+		}
 	case "show":
 		keys := ListKvKeys(args[2])
 		fmt.Printf("Keys in %s:\n", args[2])
@@ -130,4 +142,3 @@ func main() {
 		fmt.Println("Invalid command")
 	}
 }
-

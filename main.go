@@ -31,29 +31,41 @@ type KeyVaultResponse []struct {
 }
 
 func getValuesFromKeys(name string, keys []string) map[string]string {
-	query := `az keyvault secret show --name %s --vault-name %s --query value -o tsv`
-	values := make(map[string]string)
-	var wg sync.WaitGroup
-	mu := &sync.Mutex{}
+    query := `az keyvault secret show --name %s --vault-name %s --query value -o tsv`
+    values := make(map[string]string)
+    mu := &sync.Mutex{}
 
-	for _, key := range keys {
-		wg.Add(1)
-		go func(k string) {
-			defer wg.Done()
-			cmd := exec.Command("bash", "-c", fmt.Sprintf(query, k, name))
-			out, err := cmd.Output()
-			if err != nil {
-				fmt.Printf("Error fetching key %s: %v\n", k, err)
-				return
-			}
-			mu.Lock()
-			values[k] = string(out)
-			mu.Unlock()
-		}(key)
-	}
+    const numWorkers = 10
+    keysChan := make(chan string, numWorkers)
 
-	wg.Wait()
-	return values
+    var wg sync.WaitGroup
+    wg.Add(numWorkers)
+
+    for i := 0; i < numWorkers; i++ {
+        go func() {
+            defer wg.Done()
+            for k := range keysChan {
+                cmd := exec.Command("bash", "-c", fmt.Sprintf(query, k, name))
+                out, err := cmd.Output()
+                if err != nil {
+                    fmt.Printf("Error fetching key %s: %v\n", k, err)
+                    continue
+                }
+                mu.Lock()
+                values[k] = string(out)
+                mu.Unlock()
+            }
+        }()
+    }
+
+    for _, key := range keys {
+        keysChan <- key
+    }
+
+    close(keysChan)
+    wg.Wait()
+
+    return values
 }
 
 func ListKvKeys(name string) []string {

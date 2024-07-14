@@ -30,7 +30,7 @@ type KeyVaultResponse []struct {
 	} `json:"tags"`
 }
 
-func getValuesFromKeys(name string, keys []string) map[string]string {
+func getValuesFromKeys(kvname string, keys []string) map[string]string {
     query := `az keyvault secret show --name %s --vault-name %s --query value -o tsv`
     values := make(map[string]string)
     mu := &sync.Mutex{}
@@ -45,7 +45,7 @@ func getValuesFromKeys(name string, keys []string) map[string]string {
         go func() {
             defer wg.Done()
             for k := range keysChan {
-                cmd := exec.Command("bash", "-c", fmt.Sprintf(query, k, name))
+                cmd := exec.Command("bash", "-c", fmt.Sprintf(query, k, kvname))
                 out, err := cmd.Output()
                 if err != nil {
                     fmt.Printf("Error fetching key %s: %v\n", k, err)
